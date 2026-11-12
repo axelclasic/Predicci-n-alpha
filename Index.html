@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Apuestas y Analíticas Deportivas</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-gradient: linear-gradient(135deg, #0ea5e9, #2563eb);
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .contenedor-principal {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .estado-carga {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 40px;
+        }
+
+        .tarjeta-partido {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .cabecera-encuentro {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+
+        .equipos {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .equipos img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        .estado-badge {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .seccion-cuotas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .caja-cuota {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .caja-cuota span {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .caja-cuota strong {
+            font-size: 1.1rem;
+            color: var(--text-color);
+        }
+
+        .seccion-probabilidad {
+            margin-top: 15px;
+        }
+
+        .barra-container {
+            background: var(--border);
+            border-radius: 6px;
+            height: 12px;
+            overflow: hidden;
+            display: flex;
+            margin: 8px 0;
+        }
+
+        .barra-local {
+            background: #38bdf8;
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .barra-visitante {
+            background: #f43f5e;
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .etiquetas-prob {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .info-vig {
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="contenedor-principal">
+        <header>
+            <h1>📊 Panel de Apuestas & Métricas</h1>
+            <p>Sincronización en tiempo real con API y Análisis de Probabilidades</p>
+        </header>
+
+        <div id="contenedor-partidos">
+            <div class="estado-carga">Cargando encuentros y analizando cuotas...</div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de la API y tu Key integrada
+        const API_KEY = 'b55dc1db9b4f0aea7bdd5100a9952c00';
+        const BASE_URL = 'https://v1.baseball.api-sports.io'; // Cambiar si usas otro deporte
+
+        async function cargarDatosEnVivo() {
+            const contenedor = document.getElementById('contenedor-partidos');
+            try {
+                const fechaHoy = new Date().toISOString().split('T')[0];
+                
+                const respuesta = await fetch(`${BASE_URL}/games?date=${fechaHoy}`, {
+                    method: 'GET',
+                    headers: { 'x-apisports-key': API_KEY }
+                });
+
+                if (!respuesta.ok) throw new Error('Error al conectar con la API');
+
+                const resultado = await respuesta.json();
+                renderizarPanel(resultado.response);
+
+            } catch (error) {
+                console.error('Error:', error);
+                contenedor.innerHTML = `
+                    <div class="tarjeta-partido" style="text-align: center;">
+                        <p style="color: #f43f5e;">No se pudieron sincronizar los datos en vivo.</p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Mostrando estructura lista para operar. Verifica tu conexión o cuotas de la API.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Función matemática para calcular probabilidades y margen de la casa (Vig)
+        function calcularProbabilidades(cuotaLocal, cuotaVisitante) {
+            if (!cuotaLocal || !cuotaVisitante || cuotaLocal <= 1 || cuotaVisitante <= 1) {
+                return { local: '50.00', visitante: '50.00', margen: '0.00' };
+            }
+
+            const probLocalImplícita = (1 / cuotaLocal) * 100;
+            const probVisitanteImplícita = (1 / cuotaVisitante) * 100;
+
+            const sumaProbabilidades = probLocalImplícita + probVisitanteImplícita;
+            const margenCasa = sumaProbabilidades - 100;
+
+            const probRealLocal = (probLocalImplícita / sumaProbabilidades) * 100;
+            const probRealVisitante = (probVisitanteImplícita / sumaProbabilidades) * 100;
+
+            return {
+                local: probRealLocal.toFixed(1),
+                visitante: probRealVisitante.toFixed(1),
+                margen: margenCasa.toFixed(1)
+            };
+        }
+
+        function renderizarPanel(partidos) {
+            const contenedor = document.getElementById('contenedor-partidos');
+            contenedor.innerHTML = '';
+
+            if (!partidos || partidos.length === 0) {
+                contenedor.innerHTML = '<div class="estado-carga">No hay encuentros programados para el día de hoy.</div>';
+                return;
+            }
+
+            partidos.forEach(partido => {
+                // Simulamos cuotas de ejemplo si la API no las trae en la lista principal
+                const cuotaLocal = 1.85; 
+                const cuotaVisitante = 1.95;
+                const probs = calcularProbabilidades(cuotaLocal, cuotaVisitante);
+
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'tarjeta-partido';
+
+                tarjeta.innerHTML = `
+                    <div class="cabecera-encuentro">
+                        <div class="equipos">
+                            <img src="${partido.teams.home.logo}" alt="Local">
+                            <span>${partido.teams.home.name}</span>
+                            <span style="color: var(--text-muted); font-weight: normal;">vs</span>
+                            <span>${partido.teams.away.name}</span>
+                            <img src="${partido.teams.away.name ? partido.teams.away.logo : ''}" alt="Visitante">
+                        </div>
+                        <span class="estado-badge">${partido.status.short || 'EN VIVO'}</span>
+                    </div>
+
+                    <div class="seccion-cuotas">
+                        <div class="caja-cuota">
+                            <span>Cuota Local (Home)</span>
+                            <strong>${cuotaLocal}</strong>
+                        </div>
+                        <div class="caja-cuota">
+                            <span>Cuota Visitante (Away)</span>
+                            <strong>${cuotaVisitante}</strong>
+                        </div>
+                    </div>
+
+                    <div class="seccion-probabilidad">
+                        <div class="etiquetas-prob">
+                            <span>🏠 ${partido.teams.home.name}: <strong>${probs.local}%</strong></span>
+                            <span>✈️ ${partido.teams.away.name}: <strong>${probs.visitante}%</strong></span>
+                        </div>
+                        <div class="barra-container">
+                            <div class="barra-local" style="width: ${probs.local}%;"></div>
+                            <div class="barra-visitante" style="width: ${probs.visitante}%;"></div>
+                        </div>
+                        <div class="info-vig">Margen de la casa (Vig): ${probs.margen}%</div>
+                    </div>
+                `;
+
+                contenedor.appendChild(tarjeta);
+            });
+        }
+
+        // Ejecutar al cargar la página
+        document.addEventListener('DOMContentLoaded', cargarDatosEnVivo);
+    </script>
+</body>
+</html>
