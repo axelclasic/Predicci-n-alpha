@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Multideporte: MLB, NBA & NHL</title>
+    <title>SIPA - Sistema de Apuestas y Métricas</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -49,6 +49,7 @@
             justify-content: center;
             gap: 10px;
             margin-bottom: 25px;
+            flex-wrap: wrap;
         }
 
         .btn-liga {
@@ -104,12 +105,6 @@
             gap: 12px;
             font-weight: bold;
             font-size: 1.05rem;
-        }
-
-        .equipos img {
-            width: 26px;
-            height: 26px;
-            object-fit: contain;
         }
 
         .estado-badge {
@@ -190,11 +185,11 @@
 
     <div class="contenedor-principal">
         <header>
-            <h1>📊 Panel Multideporte de Apuestas</h1>
-            <p>Métricas y Probabilidades en Vivo para MLB, NBA y NHL</p>
+            <h1>📊 SIPA - Sistema de Apuestas</h1>
+            <p>Métricas, Cuotas y Probabilidades en Vivo (MLB, NBA y NHL)</p>
         </header>
 
-        <!-- Botones para cambiar entre las 3 ligas -->
+        <!-- Selector de Ligas -->
         <div class="selector-ligas">
             <button class="btn-liga activo" onclick="cambiarDeporte('baseball', this)">⚾ MLB (Béisbol)</button>
             <button class="btn-liga" onclick="cambiarDeporte('basketball', this)">🏀 NBA (Baloncesto)</button>
@@ -209,7 +204,6 @@
     <script>
         const API_KEY = 'b55dc1db9b4f0aea7bdd5100a9952c00';
         
-        // Mapeo de URLs base según la API oficial de API-Sports para cada deporte
         const URLs_DEPORTES = {
             baseball: 'https://v1.baseball.api-sports.io',
             basketball: 'https://v1.basketball.api-sports.io',
@@ -220,17 +214,14 @@
 
         function cambiarDeporte(deporte, elementoBtn) {
             deporteActual = deporte;
-            
-            // Actualizar clases activas en los botones
             document.querySelectorAll('.btn-liga').forEach(btn => btn.classList.remove('activo'));
             elementoBtn.classList.add('activo');
-
             cargarDatosDeporte(deporte);
         }
 
         async function cargarDatosDeporte(deporte) {
             const contenedor = document.getElementById('contenedor-partidos');
-            contenedor.innerHTML = `<div class="estado-carga">Cargando analíticas de ${deporte.toUpperCase()}...</div>`;
+            contenedor.innerHTML = `<div class="estado-carga">Sincronizando analíticas de ${deporte.toUpperCase()}...</div>`;
 
             const baseUrl = URLs_DEPORTES[deporte];
 
@@ -249,7 +240,7 @@
                 if (resultado.response && resultado.response.length > 0) {
                     renderizarPanel(resultado.response);
                 } else {
-                    cargarDatosDePrueba(deporte); // Respaldo si no hay juegos hoy
+                    cargarDatosDePrueba(deporte);
                 }
 
             } catch (error) {
@@ -258,7 +249,6 @@
             }
         }
 
-        // Cálculo matemático de probabilidad implícita y margen de la casa (Vig)
         function calcularProbabilidades(cuotaLocal, cuotaVisitante) {
             if (!cuotaLocal || !cuotaVisitante || cuotaLocal <= 1 || cuotaVisitante <= 1) {
                 return { local: '50.00', visitante: '50.00', margen: '0.00' };
@@ -295,11 +285,9 @@
                 tarjeta.innerHTML = `
                     <div class="cabecera-encuentro">
                         <div class="equipos">
-                            <img src="${partido.teams?.home?.logo || ''}" alt="Local">
-                            <span>${partido.teams?.home?.name || 'Local'}</span>
+                            <span>🏠 ${partido.teams?.home?.name || 'Local'}</span>
                             <span style="color: var(--text-muted); font-weight: normal;">vs</span>
-                            <span>${partido.teams?.away?.name || 'Visitante'}</span>
-                            <img src="${partido.teams?.away?.logo || ''}" alt="Visitante">
+                            <span>✈️ ${partido.teams?.away?.name || 'Visitante'}</span>
                         </div>
                         <span class="estado-badge">${partido.status?.short || 'EN VIVO'}</span>
                     </div>
@@ -317,8 +305,8 @@
 
                     <div class="seccion-probabilidad">
                         <div class="etiquetas-prob">
-                            <span>🏠 ${partido.teams?.home?.name || 'Local'}: <strong>${probs.local}%</strong></span>
-                            <span>✈️ ${partido.teams?.away?.name || 'Visitante'}: <strong>${probs.visitante}%</strong></span>
+                            <span>${partido.teams?.home?.name || 'Local'}: <strong>${probs.local}%</strong></span>
+                            <span>${partido.teams?.away?.name || 'Visitante'}: <strong>${probs.visitante}%</strong></span>
                         </div>
                         <div class="barra-container">
                             <div class="barra-local" style="width: ${probs.local}%;"></div>
@@ -332,7 +320,6 @@
             });
         }
 
-        // Datos de prueba específicos para visualizar cuando una liga no tenga partidos en la fecha actual
         function cargarDatosDePrueba(deporte) {
             const simulados = {
                 baseball: [
@@ -349,7 +336,6 @@
             renderizarPanel(simulados[deporte]);
         }
 
-        // Cargar béisbol por defecto al abrir la página
         document.addEventListener('DOMContentLoaded', () => {
             cargarDatosDeporte('baseball');
         });
