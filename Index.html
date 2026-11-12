@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S.I.P.A. Pro v4.7 - Consenso Multi-Liga</title>
+    <title>S.I.P.A. Pro v4.8 - Consenso Multi-Liga</title>
     <style>
         :root {
             --bg-principal: #0b0f19;
@@ -13,8 +13,10 @@
             --texto-mutado: #64748b;
             --oro-sugerencia: #eab308;
             --verde-exito: #10b981;
+            --azul-top3: #3b82f6;
             --rojo-error: #ef4444;
-            --glow-top5: rgba(16, 185, 129, 0.2);
+            --glow-top3: rgba(59, 130, 246, 0.25);
+            --glow-liga: rgba(16, 185, 129, 0.2);
         }
 
         * {
@@ -78,9 +80,9 @@
             justify-content: center;
         }
 
-        .panel-rendimiento.top5 {
-            border: 1px solid rgba(16, 185, 129, 0.5);
-            background: linear-gradient(135deg, #112420 0%, #0f172a 100%);
+        .panel-rendimiento.top3 {
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            background: linear-gradient(135deg, #10223f 0%, #0f172a 100%);
         }
 
         .panel-rendimiento h3 {
@@ -91,8 +93,8 @@
             margin-bottom: 6px;
         }
 
-        .panel-rendimiento.top5 h3 {
-            color: var(--verde-exito);
+        .panel-rendimiento.top3 h3 {
+            color: var(--azul-top3);
             font-weight: bold;
         }
 
@@ -104,8 +106,8 @@
             margin-bottom: 4px;
         }
 
-        .panel-rendimiento.top5 .porcentaje-grande {
-            color: var(--verde-exito);
+        .panel-rendimiento.top3 .porcentaje-grande {
+            color: var(--azul-top3);
         }
 
         .sub-conteo {
@@ -137,10 +139,18 @@
             gap: 10px;
         }
 
-        .card-juego.top5-premium {
+        /* Estilo para el Top 3 Global (Azul Radiante) */
+        .card-juego.top3-premium {
+            border: 2px solid var(--azul-top3);
+            background: linear-gradient(145deg, #10223f 0%, #151f32 100%);
+            box-shadow: 0 4px 15px var(--glow-top3);
+        }
+
+        /* Estilo para los destacados por Liga (Verdes) */
+        .card-juego.liga-premium {
             border: 2px solid var(--verde-exito);
             background: linear-gradient(145deg, #112420 0%, #151f32 100%);
-            box-shadow: 0 4px 15px var(--glow-top5);
+            box-shadow: 0 4px 15px var(--glow-liga);
         }
 
         .card-header {
@@ -177,7 +187,16 @@
             font-size: 0.7rem;
         }
 
-        .badge-top5 {
+        .badge-top3 {
+            background: var(--azul-top3);
+            color: #ffffff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 0.7rem;
+        }
+
+        .badge-liga-top {
             background: var(--verde-exito);
             color: #0b0f19;
             padding: 2px 8px;
@@ -205,21 +224,28 @@
             align-items: center;
         }
 
-        .card-juego.top5-premium .bloque-sugerencia-automatica {
+        .card-juego.top3-premium .bloque-sugerencia-automatica {
+            background: rgba(59, 130, 246, 0.02);
+            border: 1px dashed var(--azul-top3);
+        }
+
+        .card-juego.liga-premium .bloque-sugerencia-automatica {
             background: rgba(16, 185, 129, 0.02);
             border: 1px dashed var(--verde-exito);
         }
 
         .info-sugerencia { display: flex; flex-direction: column; }
         .tag-tipo-logro { font-size: 0.7rem; color: var(--oro-sugerencia); font-weight: bold; margin-bottom: 2px; }
-        .card-juego.top5-premium .tag-tipo-logro { color: var(--verde-exito); }
+        .card-juego.top3-premium .tag-tipo-logro { color: var(--azul-top3); }
+        .card-juego.liga-premium .tag-tipo-logro { color: var(--verde-exito); }
         .seleccion-texto { font-size: 0.85rem; font-weight: 600; }
         
         .cuota-valor {
             font-size: 0.85rem; font-weight: bold; background: var(--oro-sugerencia);
             color: #000; padding: 3px 8px; border-radius: 4px;
         }
-        .card-juego.top5-premium .cuota-valor { background: var(--verde-exito); color: #0b0f19; }
+        .card-juego.top3-premium .cuota-valor { background: var(--azul-top3); color: #ffffff; }
+        .card-juego.liga-premium .cuota-valor { background: var(--verde-exito); color: #0b0f19; }
 
         .no-data { color: var(--texto-mutado); font-size: 0.85rem; text-align: center; padding: 30px 0; }
         .error-texto { color: var(--rojo-error); font-weight: bold; background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--rojo-error); margin-top: 10px; }
@@ -235,10 +261,10 @@
     </header>
 
     <div class="paneles-estadisticas">
-        <div class="panel-rendimiento top5">
-            <h3>Efectividad Top 5 🔥</h3>
-            <div class="porcentaje-grande" id="top5-winrate">0%</div>
-            <div class="sub-conteo" id="top5-conteo">Evaluando...</div>
+        <div class="panel-rendimiento top3">
+            <h3>Efectividad Top 3 💎</h3>
+            <div class="porcentaje-grande" id="top3-winrate">0%</div>
+            <div class="sub-conteo" id="top3-conteo">Evaluando...</div>
         </div>
 
         <div class="panel-rendimiento global">
@@ -275,9 +301,9 @@
                 { key: 'icehockey_nhl', nombre: 'NHL', icono: '🏒', unidadTotal: 'Goles' }
             ];
             
-            var CACHE_JUEGOS = 'sipa_data_v47';
-            var CACHE_TIEMPO = 'sipa_time_v47';
-            var REGISTRO_PREDICCIONES = 'sipa_historial_v47';
+            var CACHE_JUEGOS = 'sipa_data_v48';
+            var CACHE_TIEMPO = 'sipa_time_v48';
+            var REGISTRO_PREDICCIONES = 'sipa_historial_v48';
 
             var statusDiv = document.getElementById('js-status');
             var contenedor = document.getElementById('contenedor-pizarra');
@@ -394,56 +420,100 @@
                     return;
                 }
 
+                // Orden principal por probabilidad/precio (menor cuota negativa primero)
                 listaSugerencias.sort((a, b) => a.logro.price - b.logro.price);
 
-                var htmlFinal = '';
-                listaSugerencias.forEach((item, index) => {
-                    var partido = item.partido;
-                    var logro = item.logro;
-                    var infoDep = item.deporte;
-                    var esTop5 = index < 5; 
+                // 1. Seleccionamos las 3 mejores globales (Azul)
+                var idsTop3Globales = new Set();
+                var itemsTop3Globales = listaSugerencias.slice(0, 3);
+                itemsTop3Globales.forEach(item => idsTop3Globales.add(item.partido.id));
 
-                    if (!historialPredicciones.some(p => p.gameId === partido.id)) {
+                // 2. Seleccionamos las 3 mejores de cada liga (excluyendo las que ya están en el Top 3 Global si es posible)
+                var topLigaPorDeporte = [];
+                DEPORTES.forEach(dep => {
+                    var deEstaLiga = listaSugerencias.filter(item => item.deporte.key === dep.key && !idsTop3Globales.has(item.partido.id));
+                    if (deEstaLiga.length === 0) {
+                        deEstaLiga = listaSugerencias.filter(item => item.deporte.key === dep.key);
+                    }
+                    deEstaLiga.slice(0, 3).forEach(item => {
+                        topLigaPorDeporte.push(item);
+                        idsTop3Globales.add(item.partido.id); // Para evitar duplicados innecesarios
+                    });
+                });
+
+                // 3. El resto de las apuestas ordenadas por probabilidad
+                var restoApuestas = listaSugerencias.filter(item => !idsTop3Globales.has(item.partido.id));
+
+                var htmlFinal = '';
+
+                // Renderizar Top 3 Global (Azul Radiante)
+                itemsTop3Globales.forEach((item, index) => {
+                    htmlFinal += construirTarjeta(item, 'top3-premium', '💎 TOP 3', item.deporte);
+                });
+
+                // Renderizar Top 3 por Liga (Verde)
+                topLigaPorDeporte.forEach((item, index) => {
+                    htmlFinal += construirTarjeta(item, 'liga-premium', '⭐ ' + item.deporte.nombre + ' TOP', item.deporte);
+                });
+
+                // Renderizar el resto de la pizarra ordenadas por probabilidad
+                restoApuestas.forEach((item, index) => {
+                    htmlFinal += construirTarjeta(item, '', 'CONSENSO', item.deporte);
+                });
+
+                // Actualizar historial completo con las marcas correspondientes
+                listaSugerencias.forEach(item => {
+                    var esTop3Global = itemsTop3Globales.some(t => t.partido.id === item.partido.id);
+                    var esTopLiga = topLigaPorDeporte.some(l => l.partido.id === item.partido.id);
+
+                    if (!historialPredicciones.some(p => p.gameId === item.partido.id)) {
                         historialPredicciones.push({
-                            gameId: partido.id,
-                            sportKey: partido.sport_key,
-                            market: logro.market,
-                            selection: logro.name,
-                            point: logro.point, 
+                            gameId: item.partido.id,
+                            sportKey: item.partido.sport_key,
+                            market: item.logro.market,
+                            selection: item.logro.name,
+                            point: item.logro.point, 
                             status: 'pendiente',
-                            isTop5: esTop5 
+                            isTop3: esTop3Global,
+                            isTopLiga: esTopLiga
                         });
                     }
-
-                    var d = new Date(partido.commence_time);
-                    var h = d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
-
-                    htmlFinal += `
-                        <div class="card-juego ${esTop5 ? 'top5-premium' : ''}">
-                            <div class="card-header">
-                                <div class="badges-grupo">
-                                    <span class="${esTop5 ? 'badge-top5' : 'badge-sistema'}">${esTop5 ? '🔥 TOP 5' : 'CONSENSO'}</span>
-                                    <span class="badge-liga">${infoDep.icono} ${infoDep.nombre}</span>
-                                </div>
-                                <span>${h}</span>
-                            </div>
-                            <div class="duelo-equipos">
-                                <div>${infoDep.icono} ${partido.away_team}</div>
-                                <div>🏠 ${partido.home_team}</div>
-                            </div>
-                            <div class="bloque-sugerencia-automatica">
-                                <div class="info-sugerencia">
-                                    <span class="tag-tipo-logro">${logro.label}</span>
-                                    <span class="seleccion-texto">${logro.name}</span>
-                                </div>
-                                <div class="cuota-valor">${logro.price}</div>
-                            </div>
-                        </div>
-                    `;
                 });
 
                 contenedor.innerHTML = htmlFinal;
                 localStorage.setItem(REGISTRO_PREDICCIONES, JSON.stringify(historialPredicciones));
+            }
+
+            function construirTarjeta(item, claseExtra, textoBadge, infoDep) {
+                var partido = item.partido;
+                var logro = item.logro;
+                var d = new Date(partido.commence_time);
+                var h = d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+
+                var badgeClase = claseExtra === 'top3-premium' ? 'badge-top3' : (claseExtra === 'liga-premium' ? 'badge-liga-top' : 'badge-sistema');
+
+                return `
+                    <div class="card-juego ${claseExtra}">
+                        <div class="card-header">
+                            <div class="badges-grupo">
+                                <span class="${badgeClase}">${textoBadge}</span>
+                                <span class="badge-liga">${infoDep.icono} ${infoDep.nombre}</span>
+                            </div>
+                            <span>${h}</span>
+                        </div>
+                        <div class="duelo-equipos">
+                            <div>${infoDep.icono} ${partido.away_team}</div>
+                            <div>🏠 ${partido.home_team}</div>
+                        </div>
+                        <div class="bloque-sugerencia-automatica">
+                            <div class="info-sugerencia">
+                                <span class="tag-tipo-logro">${logro.label}</span>
+                                <span class="seleccion-texto">${logro.name}</span>
+                            </div>
+                            <div class="cuota-valor">${logro.price}</div>
+                        </div>
+                    </div>
+                `;
             }
 
             async function verificarResultados() {
@@ -497,15 +567,15 @@
                     var historial = JSON.parse(str);
                     
                     var totalGlobal = 0, ganadasGlobal = 0;
-                    var totalTop5 = 0, ganadasTop5 = 0;
+                    var totalTop3 = 0, ganadasTop3 = 0;
 
                     historial.forEach(p => {
                         if (p.status !== 'pendiente') {
                             totalGlobal++;
                             if (p.status === 'ganada') ganadasGlobal++;
-                            if (p.isTop5) {
-                                totalTop5++;
-                                if (p.status === 'ganada') ganadasTop5++;
+                            if (p.isTop3) {
+                                totalTop3++;
+                                if (p.status === 'ganada') ganadasTop3++;
                             }
                         }
                     });
@@ -515,10 +585,10 @@
                     if(elWinGlobal) elWinGlobal.innerText = (totalGlobal > 0 ? Math.round((ganadasGlobal / totalGlobal) * 100) : 0) + '%';
                     if(elContGlobal) elContGlobal.innerText = ganadasGlobal + ' ✓ / ' + totalGlobal + ' Eval';
 
-                    var elWinTop5 = document.getElementById('top5-winrate');
-                    var elContTop5 = document.getElementById('top5-conteo');
-                    if(elWinTop5) elWinTop5.innerText = (totalTop5 > 0 ? Math.round((ganadasTop5 / totalTop5) * 100) : 0) + '%';
-                    if(elContTop5) elContTop5.innerText = ganadasTop5 + ' ✓ / ' + totalTop5 + ' Eval';
+                    var elWinTop3 = document.getElementById('top3-winrate');
+                    var elContTop3 = document.getElementById('top3-conteo');
+                    if(elWinTop3) elWinTop3.innerText = (totalTop3 > 0 ? Math.round((ganadasTop3 / totalTop3) * 100) : 0) + '%';
+                    if(elContTop3) elContTop3.innerText = ganadasTop3 + ' ✓ / ' + totalTop3 + ' Eval';
                 } catch(e) {}
             }
 
