@@ -304,7 +304,7 @@
                     var promesas = DEPORTES.map(dep => {
                         var url = 'https://api.the-odds-api.com/v4/sports/' + dep.key + '/odds/?apiKey=' + API_KEY + '&regions=us&markets=h2h,spreads,totals&oddsFormat=american';
                         return fetch(url).then(res => {
-                            if (!res.ok) return []; // Si una liga está fuera de temporada o falla, no tumba las demás
+                            if (!res.ok) return [];
                             return res.json();
                         }).catch(() => []);
                     });
@@ -454,7 +454,6 @@
                     var pendientes = predicciones.filter(p => p.status === 'pendiente');
                     if (pendientes.length === 0) return;
 
-                    // Consultamos solo las ligas que tienen predicciones pendientes
                     var ligasPendientes = [...new Set(pendientes.map(p => p.sportKey || 'baseball_mlb'))];
 
                     var promesasScores = ligasPendientes.map(sportKey => {
@@ -484,4 +483,67 @@
                                 pred.status = (pred.selection.toLowerCase() === 'over' ? t > p : t < p) ? 'ganada' : 'perdida';
                             }
                             cambios = true;
-               
+                        }
+                    });
+
+                    if (cambios) localStorage.setItem(REGISTRO_PREDICCIONES, JSON.stringify(predicciones));
+                } catch(e) {}
+            }
+
+            function actualizarDashboard() {
+                try {
+                    var str = localStorage.getItem(REGISTRO_PREDICCIONES);
+                    if (!str) return;
+                    var historial = JSON.parse(str);
+                    
+                    var totalGlobal = 0, ganadasGlobal = 0;
+                    var totalTop5 = 0, ganadasTop5 = 0;
+
+                    historial.forEach(p => {
+                        if (p.status !== 'pendiente') {
+                            totalGlobal++;
+                            if (p.status === 'ganada') ganadasGlobal++;
+                            if (p.isTop5) {
+                                totalTop5++;
+                                if (p.status === 'ganada') ganadasTop5++;
+                            }
+                        }
+                    });
+
+                    var elWinGlobal = document.getElementById('global-winrate');
+                    var elContGlobal = document.getElementById('global-conteo');
+                    if(elWinGlobal) elWinGlobal.innerText = (totalGlobal > 0 ? Math.round((ganadasGlobal / totalGlobal) * 100) : 0) + '%';
+                    if(elContGlobal) elContGlobal.innerText = ganadasGlobal + ' ✓ / ' + totalGlobal + ' Eval';
+
+                    var elWinTop5 = document.getElementById('top5-winrate');
+                    var elContTop5 = document.getElementById('top5-conteo');
+                    if(elWinTop5) elWinTop5.innerText = (totalTop5 > 0 ? Math.round((ganadasTop5 / totalTop5) * 100) : 0) + '%';
+                    if(elContTop5) elContTop5.innerText = ganadasTop5 + ' ✓ / ' + totalTop5 + ' Eval';
+                } catch(e) {}
+            }
+
+            // Flujo de inicio limpio
+            try {
+                var cacheStr = localStorage.getItem(CACHE_JUEGOS);
+                var timestamp = localStorage.getItem(CACHE_TIEMPO);
+                var ahora = new Date().getTime();
+
+                if (cacheStr && timestamp && (ahora - timestamp < 4 * 60 * 60 * 1000)) {
+                    var partidosGuardados = JSON.parse(cacheStr);
+                    if (partidosGuardados && partidosGuardados.length > 0) {
+                        procesarConsensoMercado(partidosGuardados);
+                        await verificarResultados();
+                        actualizarDashboard();
+                    } else {
+                        await descargarDatos();
+                    }
+                } else {
+                    await descargarDatos();
+                }
+            } catch (error) {
+                if(contenedor) contenedor.innerHTML = '<div class="error-texto">⚠️ Error al iniciar: ' + error.message + '</div>';
+            }
+        })();
+    </script>
+</body>
+</html>
