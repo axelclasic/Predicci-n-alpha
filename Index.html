@@ -3,342 +3,485 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIPA - Sistema de Apuestas y Métricas</title>
+    <title>S.I.P.A. Pro v4.7 - Consenso Multi-Liga</title>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #38bdf8;
-            --border: #334155;
+            --bg-principal: #0b0f19;
+            --bg-tarjetas: #151f32;
+            --bg-interacciones: #222f47;
+            --texto-blanco: #f1f5f9;
+            --texto-mutado: #64748b;
+            --oro-sugerencia: #eab308;
+            --verde-exito: #10b981;
+            --rojo-error: #ef4444;
+            --glow-top5: rgba(16, 185, 129, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
+            background-color: var(--bg-principal);
+            color: var(--texto-blanco);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         header {
-            text-align: center;
-            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--bg-interacciones);
+            margin-bottom: 15px;
         }
 
         header h1 {
-            margin: 0;
-            font-size: 1.8rem;
-            color: var(--accent);
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
         }
 
-        header p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        .contenedor-principal {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* Barra de selección de ligas */
-        .selector-ligas {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
-        .btn-liga {
-            background-color: var(--card-bg);
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
+        .btn-refresh {
+            background: var(--bg-interacciones);
+            color: var(--texto-blanco);
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
             font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-liga.activo {
-            background: var(--accent);
-            color: #0f172a;
-            border-color: var(--accent);
-        }
-
-        .btn-liga:hover {
-            border-color: var(--accent);
-            color: var(--text-color);
-        }
-
-        .estado-carga {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            margin-top: 40px;
-        }
-
-        .tarjeta-partido {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .cabecera-encuentro {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 12px;
-            margin-bottom: 15px;
-        }
-
-        .equipos {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: bold;
-            font-size: 1.05rem;
-        }
-
-        .estado-badge {
-            background: rgba(56, 189, 248, 0.1);
-            color: var(--accent);
-            padding: 4px 10px;
-            border-radius: 20px;
             font-size: 0.8rem;
-            font-weight: 600;
+            cursor: pointer;
         }
 
-        .seccion-cuotas {
+        .paneles-estadisticas {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        .caja-cuota {
-            background: rgba(15, 23, 42, 0.5);
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-
-        .caja-cuota span {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .caja-cuota strong {
-            font-size: 1.1rem;
-            color: var(--text-color);
-        }
-
-        .seccion-probabilidad {
-            margin-top: 15px;
-        }
-
-        .barra-container {
-            background: var(--border);
-            border-radius: 6px;
-            height: 12px;
-            overflow: hidden;
+        .panel-rendimiento {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid var(--bg-interacciones);
+            border-radius: 12px;
+            padding: 15px 10px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             display: flex;
-            margin: 8px 0;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        .barra-local {
-            background: #38bdf8;
-            height: 100%;
-            transition: width 0.5s ease;
+        .panel-rendimiento.top5 {
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            background: linear-gradient(135deg, #112420 0%, #0f172a 100%);
         }
 
-        .barra-visitante {
-            background: #f43f5e;
-            height: 100%;
-            transition: width 0.5s ease;
+        .panel-rendimiento h3 {
+            font-size: 0.75rem;
+            color: var(--texto-mutado);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
         }
 
-        .etiquetas-prob {
+        .panel-rendimiento.top5 h3 {
+            color: var(--verde-exito);
+            font-weight: bold;
+        }
+
+        .porcentaje-grande {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--texto-blanco);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .panel-rendimiento.top5 .porcentaje-grande {
+            color: var(--verde-exito);
+        }
+
+        .sub-conteo {
+            font-size: 0.75rem;
+            color: var(--texto-mutado);
+        }
+
+        .seccion-predicciones h2 {
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+            color: var(--texto-blanco);
+            font-weight: 600;
+        }
+
+        .grid-juegos {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .card-juego {
+            background-color: var(--bg-tarjetas);
+            border-radius: 10px;
+            padding: 14px;
+            border: 1px solid var(--bg-interacciones);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-juego.top5-premium {
+            border: 2px solid var(--verde-exito);
+            background: linear-gradient(145deg, #112420 0%, #151f32 100%);
+            box-shadow: 0 4px 15px var(--glow-top5);
+        }
+
+        .card-header {
             display: flex;
             justify-content: space-between;
-            font-size: 0.85rem;
-            color: var(--text-muted);
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--texto-mutado);
         }
 
-        .info-vig {
-            text-align: right;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 8px;
+        .badges-grupo {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
+
+        .badge-liga {
+            background: rgba(241, 245, 249, 0.08);
+            color: var(--texto-blanco);
+            border: 1px solid rgba(241, 245, 249, 0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.68rem;
+        }
+
+        .badge-sistema {
+            background: rgba(234, 179, 8, 0.1);
+            color: var(--oro-sugerencia);
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.7rem;
+        }
+
+        .badge-top5 {
+            background: var(--verde-exito);
+            color: #0b0f19;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 0.7rem;
+        }
+
+        .duelo-equipos {
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .bloque-sugerencia-automatica {
+            margin-top: 5px;
+            background: rgba(234, 179, 8, 0.02);
+            border: 1px dashed var(--oro-sugerencia);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-juego.top5-premium .bloque-sugerencia-automatica {
+            background: rgba(16, 185, 129, 0.02);
+            border: 1px dashed var(--verde-exito);
+        }
+
+        .info-sugerencia { display: flex; flex-direction: column; }
+        .tag-tipo-logro { font-size: 0.7rem; color: var(--oro-sugerencia); font-weight: bold; margin-bottom: 2px; }
+        .card-juego.top5-premium .tag-tipo-logro { color: var(--verde-exito); }
+        .seleccion-texto { font-size: 0.85rem; font-weight: 600; }
+        
+        .cuota-valor {
+            font-size: 0.85rem; font-weight: bold; background: var(--oro-sugerencia);
+            color: #000; padding: 3px 8px; border-radius: 4px;
+        }
+        .card-juego.top5-premium .cuota-valor { background: var(--verde-exito); color: #0b0f19; }
+
+        .no-data { color: var(--texto-mutado); font-size: 0.85rem; text-align: center; padding: 30px 0; }
+        .error-texto { color: var(--rojo-error); font-weight: bold; background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border: 1px solid var(--rojo-error); margin-top: 10px; }
+        
+        #js-status { font-weight: bold; font-size: 0.75rem; display: block; margin-top: 8px; }
     </style>
 </head>
 <body>
 
-    <div class="contenedor-principal">
-        <header>
-            <h1>📊 SIPA - Sistema de Apuestas</h1>
-            <p>Métricas, Cuotas y Probabilidades en Vivo (MLB, NBA y NHL)</p>
-        </header>
+    <header>
+        <h1>S.I.P.A. Consensus</h1>
+        <button class="btn-refresh" id="btn-sincronizar">Sincronizar 🔄</button>
+    </header>
 
-        <!-- Selector de Ligas -->
-        <div class="selector-ligas">
-            <button class="btn-liga activo" onclick="cambiarDeporte('baseball', this)">⚾ MLB (Béisbol)</button>
-            <button class="btn-liga" onclick="cambiarDeporte('basketball', this)">🏀 NBA (Baloncesto)</button>
-            <button class="btn-liga" onclick="cambiarDeporte('hockey', this)">🏒 NHL (Hockey)</button>
+    <div class="paneles-estadisticas">
+        <div class="panel-rendimiento top5">
+            <h3>Efectividad Top 5 🔥</h3>
+            <div class="porcentaje-grande" id="top5-winrate">0%</div>
+            <div class="sub-conteo" id="top5-conteo">Evaluando...</div>
         </div>
 
-        <div id="contenedor-partidos">
-            <div class="estado-carga">Selecciona una liga para cargar los encuentros...</div>
+        <div class="panel-rendimiento global">
+            <h3>Global Seguro</h3>
+            <div class="porcentaje-grande" id="global-winrate">0%</div>
+            <div class="sub-conteo" id="global-conteo">Evaluando...</div>
+        </div>
+    </div>
+
+    <div class="seccion-predicciones">
+        <h2>Pizarra Multi-Liga (Filtro -140 a -250)</h2>
+        <div class="grid-juegos" id="contenedor-pizarra">
+            <p class="no-data" id="texto-carga">
+                Cargando pizarra oficial (MLB / NBA / NHL)...<br>
+                <span id="js-status" style="color:var(--rojo-error)">[Esperando arranque JS...]</span>
+            </p>
         </div>
     </div>
 
     <script>
-        const API_KEY = 'b55dc1db9b4f0aea7bdd5100a9952c00';
-        
-        const URLs_DEPORTES = {
-            baseball: 'https://v1.baseball.api-sports.io',
-            basketball: 'https://v1.basketball.api-sports.io',
-            hockey: 'https://v1.hockey.api-sports.io'
+        // CAZADOR DE ERRORES ABSOLUTO
+        window.onerror = function(msg, url, line) {
+            var c = document.getElementById('contenedor-pizarra');
+            if(c) c.innerHTML = '<div class="error-texto">💥 ERROR JS FATAL: ' + msg + ' (Línea ' + line + '). Asegúrate de haber copiado todo el código hasta la última línea.</div>';
+            return false;
         };
 
-        let deporteActual = 'baseball';
+        // MOTOR PRINCIPAL
+        (async function() {
+            var API_KEY = 'b55dc1db9b4f0aea7bdd5100a9952c00'; 
+            var DEPORTES = [
+                { key: 'baseball_mlb', nombre: 'MLB', icono: '⚾', unidadTotal: 'Carreras' },
+                { key: 'basketball_nba', nombre: 'NBA', icono: '🏀', unidadTotal: 'Puntos' },
+                { key: 'icehockey_nhl', nombre: 'NHL', icono: '🏒', unidadTotal: 'Goles' }
+            ];
+            
+            var CACHE_JUEGOS = 'sipa_data_v47';
+            var CACHE_TIEMPO = 'sipa_time_v47';
+            var REGISTRO_PREDICCIONES = 'sipa_historial_v47';
 
-        function cambiarDeporte(deporte, elementoBtn) {
-            deporteActual = deporte;
-            document.querySelectorAll('.btn-liga').forEach(btn => btn.classList.remove('activo'));
-            elementoBtn.classList.add('activo');
-            cargarDatosDeporte(deporte);
-        }
+            var statusDiv = document.getElementById('js-status');
+            var contenedor = document.getElementById('contenedor-pizarra');
+            
+            if(statusDiv) {
+                statusDiv.innerText = "[Motor JS en línea 🟢]";
+                statusDiv.style.color = "var(--verde-exito)";
+            }
 
-        async function cargarDatosDeporte(deporte) {
-            const contenedor = document.getElementById('contenedor-partidos');
-            contenedor.innerHTML = `<div class="estado-carga">Sincronizando analíticas de ${deporte.toUpperCase()}...</div>`;
+            document.getElementById('btn-sincronizar').addEventListener('click', function() {
+                localStorage.removeItem(CACHE_JUEGOS);
+                localStorage.removeItem(CACHE_TIEMPO);
+                descargarDatos();
+            });
 
-            const baseUrl = URLs_DEPORTES[deporte];
+            function obtenerInfoDeporte(sportKey) {
+                return DEPORTES.find(d => d.key === sportKey) || { key: sportKey, nombre: 'LIGA', icono: '🏆', unidadTotal: 'Total' };
+            }
 
-            try {
-                const fechaHoy = new Date().toISOString().split('T')[0];
+            async function descargarDatos() {
+                if(contenedor) contenedor.innerHTML = '<p class="no-data">Conectando con la API (MLB, NBA, NHL) y filtrando cuotas...</p>';
                 
-                const respuesta = await fetch(`${baseUrl}/games?date=${fechaHoy}`, {
-                    method: 'GET',
-                    headers: { 'x-apisports-key': API_KEY }
+                try {
+                    var promesas = DEPORTES.map(dep => {
+                        var url = 'https://api.the-odds-api.com/v4/sports/' + dep.key + '/odds/?apiKey=' + API_KEY + '&regions=us&markets=h2h,spreads,totals&oddsFormat=american';
+                        return fetch(url).then(res => {
+                            if (!res.ok) return []; // Si una liga está fuera de temporada o falla, no tumba las demás
+                            return res.json();
+                        }).catch(() => []);
+                    });
+
+                    var resultadosPorLiga = await Promise.all(promesas);
+                    var todosLosPartidos = resultadosPorLiga.flat();
+
+                    if (!todosLosPartidos || todosLosPartidos.length === 0) {
+                        contenedor.innerHTML = '<p class="no-data">No hay juegos programados en MLB, NBA o NHL ahora mismo.</p>';
+                        return;
+                    }
+
+                    localStorage.setItem(CACHE_JUEGOS, JSON.stringify(todosLosPartidos));
+                    localStorage.setItem(CACHE_TIEMPO, new Date().getTime().toString());
+                    
+                    procesarConsensoMercado(todosLosPartidos);
+                    await verificarResultados();
+                    actualizarDashboard();
+                } catch (error) {
+                    if(contenedor) contenedor.innerHTML = '<div class="error-texto">⚠️ Fallo de red: ' + error.message + '</div>';
+                }
+            }
+
+            function procesarConsensoMercado(partidos) {
+                if(!contenedor) return;
+
+                var historialPredicciones = [];
+                try {
+                    var guardado = localStorage.getItem(REGISTRO_PREDICCIONES);
+                    if (guardado) historialPredicciones = JSON.parse(guardado);
+                } catch(e) {}
+                
+                var listaSugerencias = [];
+
+                partidos.forEach(partido => {
+                    if (!partido.bookmakers || partido.bookmakers.length === 0) return;
+                    var infoDep = obtenerInfoDeporte(partido.sport_key);
+                    var mapaResultados = {};
+
+                    partido.bookmakers.forEach(bookmaker => {
+                        if (!bookmaker.markets) return;
+                        bookmaker.markets.forEach(market => {
+                            if (!market.outcomes) return; 
+                            
+                            market.outcomes.forEach(out => {
+                                if (typeof out.price !== 'number') return; 
+                                
+                                var pTxt = out.point !== undefined ? out.point : '';
+                                var llave = market.key + '_' + out.name + '_' + pTxt;
+
+                                if (!mapaResultados[llave]) {
+                                    var lbl = market.key === 'h2h' ? 'Gana Directo (ML)' : 
+                                              market.key === 'spreads' ? 'Hándicap (' + out.point + ')' : 
+                                              'Total ' + infoDep.unidadTotal + ' (' + out.name + ' ' + out.point + ')';
+
+                                    mapaResultados[llave] = {
+                                        market: market.key, name: out.name, point: pTxt,
+                                        label: lbl, sumaPrecios: 0, contadorCasas: 0
+                                    };
+                                }
+                                mapaResultados[llave].sumaPrecios += out.price;
+                                mapaResultados[llave].contadorCasas++;
+                            });
+                        });
+                    });
+
+                    var mejoresOpciones = [];
+                    for (var k in mapaResultados) {
+                        var opt = mapaResultados[k];
+                        if(opt.contadorCasas === 0) continue;
+                        
+                        var precioPromedio = Math.round(opt.sumaPrecios / opt.contadorCasas);
+                        if (precioPromedio <= -140 && precioPromedio >= -250) {
+                            opt.price = precioPromedio;
+                            mejoresOpciones.push(opt);
+                        }
+                    }
+
+                    if (mejoresOpciones.length > 0) {
+                        mejoresOpciones.sort((a, b) => a.price - b.price);
+                        listaSugerencias.push({ partido: partido, logro: mejoresOpciones[0], deporte: infoDep });
+                    }
                 });
 
-                if (!respuesta.ok) throw new Error('Error al conectar con la API');
-
-                const resultado = await respuesta.json();
-                
-                if (resultado.response && resultado.response.length > 0) {
-                    renderizarPanel(resultado.response);
-                } else {
-                    cargarDatosDePrueba(deporte);
+                if (listaSugerencias.length === 0) {
+                    contenedor.innerHTML = '<p class="no-data">Ningún juego de MLB, NBA o NHL cumple hoy con el filtro inteligente (-140 a -250).</p>';
+                    return;
                 }
 
-            } catch (error) {
-                console.error('Error de red o API:', error);
-                cargarDatosDePrueba(deporte);
+                listaSugerencias.sort((a, b) => a.logro.price - b.logro.price);
+
+                var htmlFinal = '';
+                listaSugerencias.forEach((item, index) => {
+                    var partido = item.partido;
+                    var logro = item.logro;
+                    var infoDep = item.deporte;
+                    var esTop5 = index < 5; 
+
+                    if (!historialPredicciones.some(p => p.gameId === partido.id)) {
+                        historialPredicciones.push({
+                            gameId: partido.id,
+                            sportKey: partido.sport_key,
+                            market: logro.market,
+                            selection: logro.name,
+                            point: logro.point, 
+                            status: 'pendiente',
+                            isTop5: esTop5 
+                        });
+                    }
+
+                    var d = new Date(partido.commence_time);
+                    var h = d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+
+                    htmlFinal += `
+                        <div class="card-juego ${esTop5 ? 'top5-premium' : ''}">
+                            <div class="card-header">
+                                <div class="badges-grupo">
+                                    <span class="${esTop5 ? 'badge-top5' : 'badge-sistema'}">${esTop5 ? '🔥 TOP 5' : 'CONSENSO'}</span>
+                                    <span class="badge-liga">${infoDep.icono} ${infoDep.nombre}</span>
+                                </div>
+                                <span>${h}</span>
+                            </div>
+                            <div class="duelo-equipos">
+                                <div>${infoDep.icono} ${partido.away_team}</div>
+                                <div>🏠 ${partido.home_team}</div>
+                            </div>
+                            <div class="bloque-sugerencia-automatica">
+                                <div class="info-sugerencia">
+                                    <span class="tag-tipo-logro">${logro.label}</span>
+                                    <span class="seleccion-texto">${logro.name}</span>
+                                </div>
+                                <div class="cuota-valor">${logro.price}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                contenedor.innerHTML = htmlFinal;
+                localStorage.setItem(REGISTRO_PREDICCIONES, JSON.stringify(historialPredicciones));
             }
-        }
 
-        function calcularProbabilidades(cuotaLocal, cuotaVisitante) {
-            if (!cuotaLocal || !cuotaVisitante || cuotaLocal <= 1 || cuotaVisitante <= 1) {
-                return { local: '50.00', visitante: '50.00', margen: '0.00' };
-            }
+            async function verificarResultados() {
+                try {
+                    var str = localStorage.getItem(REGISTRO_PREDICCIONES);
+                    if (!str) return;
+                    var predicciones = JSON.parse(str);
+                    var pendientes = predicciones.filter(p => p.status === 'pendiente');
+                    if (pendientes.length === 0) return;
 
-            const probLocalImplícita = (1 / cuotaLocal) * 100;
-            const probVisitanteImplícita = (1 / cuotaVisitante) * 100;
+                    // Consultamos solo las ligas que tienen predicciones pendientes
+                    var ligasPendientes = [...new Set(pendientes.map(p => p.sportKey || 'baseball_mlb'))];
 
-            const sumaProbabilidades = probLocalImplícita + probVisitanteImplícita;
-            const margenCasa = sumaProbabilidades - 100;
+                    var promesasScores = ligasPendientes.map(sportKey => {
+                        var url = 'https://api.the-odds-api.com/v4/sports/' + sportKey + '/scores/?daysFrom=3&apiKey=' + API_KEY;
+                        return fetch(url).then(res => res.ok ? res.json() : []).catch(() => []);
+                    });
 
-            const probRealLocal = (probLocalImplícita / sumaProbabilidades) * 100;
-            const probRealVisitante = (probVisitanteImplícita / sumaProbabilidades) * 100;
+                    var resultadosScores = await Promise.all(promesasScores);
+                    var scores = resultadosScores.flat();
+                    var cambios = false;
 
-            return {
-                local: probRealLocal.toFixed(1),
-                visitante: probRealVisitante.toFixed(1),
-                margen: margenCasa.toFixed(1)
-            };
-        }
-
-        function renderizarPanel(partidos) {
-            const contenedor = document.getElementById('contenedor-partidos');
-            contenedor.innerHTML = '';
-
-            partidos.forEach(partido => {
-                const cuotaLocal = 1.90; 
-                const cuotaVisitante = 1.90;
-                const probs = calcularProbabilidades(cuotaLocal, cuotaVisitante);
-
-                const tarjeta = document.createElement('div');
-                tarjeta.className = 'tarjeta-partido';
-
-                tarjeta.innerHTML = `
-                    <div class="cabecera-encuentro">
-                        <div class="equipos">
-                            <span>🏠 ${partido.teams?.home?.name || 'Local'}</span>
-                            <span style="color: var(--text-muted); font-weight: normal;">vs</span>
-                            <span>✈️ ${partido.teams?.away?.name || 'Visitante'}</span>
-                        </div>
-                        <span class="estado-badge">${partido.status?.short || 'EN VIVO'}</span>
-                    </div>
-
-                    <div class="seccion-cuotas">
-                        <div class="caja-cuota">
-                            <span>Cuota Local</span>
-                            <strong>${cuotaLocal}</strong>
-                        </div>
-                        <div class="caja-cuota">
-                            <span>Cuota Visitante</span>
-                            <strong>${cuotaVisitante}</strong>
-                        </div>
-                    </div>
-
-                    <div class="seccion-probabilidad">
-                        <div class="etiquetas-prob">
-                            <span>${partido.teams?.home?.name || 'Local'}: <strong>${probs.local}%</strong></span>
-                            <span>${partido.teams?.away?.name || 'Visitante'}: <strong>${probs.visitante}%</strong></span>
-                        </div>
-                        <div class="barra-container">
-                            <div class="barra-local" style="width: ${probs.local}%;"></div>
-                            <div class="barra-visitante" style="width: ${probs.visitante}%;"></div>
-                        </div>
-                        <div class="info-vig">Margen de la casa (Vig): ${probs.margen}%</div>
-                    </div>
-                `;
-
-                contenedor.appendChild(tarjeta);
-            });
-        }
-
-        function cargarDatosDePrueba(deporte) {
-            const simulados = {
-                baseball: [
-                    { teams: { home: { name: 'New York Yankees' }, away: { name: 'Boston Red Sox' } }, status: { short: 'MLB' } }
-                ],
-                basketball: [
-                    { teams: { home: { name: 'Los Angeles Lakers' }, away: { name: 'Golden State Warriors' } }, status: { short: 'NBA' } }
-                ],
-                hockey: [
-                    { teams: { home: { name: 'Montreal Canadiens' }, away: { name: 'Toronto Maple Leafs' } }, status: { short: 'NHL' } }
-                ]
-            };
-
-            renderizarPanel(simulados[deporte]);
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            cargarDatosDeporte('baseball');
-        });
-    </script>
-</body>
-</html>
+                    predicciones.forEach(pred => {
+                        if (pred.status !== 'pendiente') return;
+                        var juego = scores.find(s => s.id === pred.gameId);
+                        if (juego && juego.completed && juego.scores) {
+                            var homeS = parseInt((juego.scores.find(s => s.name === juego.home_team) || {score:0}).score);
+                            var awayS = parseInt((juego.scores.find(s => s.name === juego.away_team) || {score:0}).score);
+                            
+                            if (pred.market === 'h2h') {
+                                pred.status = (pred.selection === (homeS > awayS ? juego.home_team : juego.away_team)) ? 'ganada' : 'perdida';
+                            } else if (pred.market === 'spreads') {
+                                var v = parseFloat(pred.point);
+                                pred.status = (pred.selection === juego.home_team ? (homeS+v > awayS) : (awayS+v > homeS)) ? 'ganada' : 'perdida';
+                            } else if (pred.market === 'totals') {
+                                var t = homeS + awayS;
+                                var p = parseFloat(pred.point);
+                                pred.status = (pred.selection.toLowerCase() === 'over' ? t > p : t < p) ? 'ganada' : 'perdida';
+                            }
+                            cambios = true;
+               
